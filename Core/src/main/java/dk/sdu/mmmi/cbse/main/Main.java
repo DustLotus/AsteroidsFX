@@ -41,7 +41,6 @@ public class Main extends Application {
         Pane gameWindow = new Pane();
         gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
         gameWindow.getChildren().add(text);
-
         Scene scene = new Scene(gameWindow);
         scene.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.LEFT)) {
@@ -53,6 +52,9 @@ public class Main extends Application {
             if (event.getCode().equals(KeyCode.UP)) {
                 gameData.getKeys().setKey(GameKeys.UP, true);
             }
+            if (event.getCode().equals(KeyCode.SPACE)) {
+                gameData.getKeys().setKey(GameKeys.SPACE, true);
+            }
         });
         scene.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.LEFT)) {
@@ -63,6 +65,9 @@ public class Main extends Application {
             }
             if (event.getCode().equals(KeyCode.UP)) {
                 gameData.getKeys().setKey(GameKeys.UP, false);
+            }
+            if (event.getCode().equals(KeyCode.SPACE)) {
+                gameData.getKeys().setKey(GameKeys.SPACE, false);
             }
 
         });
@@ -80,6 +85,17 @@ public class Main extends Application {
         render();
 
         window.setScene(scene);
+
+
+        new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                update(); // Update delta time and process input
+                update(); // Update game logic
+                draw(); // Draw the game state to the screen
+            }
+        }.start(); // Start the game loop
+
         window.setTitle("ASTEROIDS");
         window.show();
 
@@ -113,9 +129,11 @@ public class Main extends Application {
     private void draw() {
         for (Entity entity : world.getEntities()) {
             Polygon polygon = polygons.get(entity);
-            polygon.setTranslateX(entity.getX());
-            polygon.setTranslateY(entity.getY());
-            polygon.setRotate(entity.getRotation());
+            if (polygon != null) { // Add this null check to prevent NullPointerException
+                polygon.setTranslateX(entity.getX());
+                polygon.setTranslateY(entity.getY());
+                polygon.setRotate(entity.getRotation());
+            }
         }
     }
 
