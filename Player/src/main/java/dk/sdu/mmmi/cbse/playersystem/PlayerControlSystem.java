@@ -17,21 +17,28 @@ public class PlayerControlSystem implements IEntityProcessingService {
 
     @Override
     public void process(GameData gameData, World world) {
-            
+
         for (Entity player : world.getEntities(Player.class)) {
             if (gameData.getKeys().isDown(GameKeys.LEFT)) {
-                player.setRotation(player.getRotation() - 5);                
+                player.setRotation(player.getRotation() - 5);
             }
             if (gameData.getKeys().isDown(GameKeys.RIGHT)) {
-                player.setRotation(player.getRotation() + 5);                
+                player.setRotation(player.getRotation() + 5);
             }
             if (gameData.getKeys().isDown(GameKeys.UP)) {
                 double changeX = Math.cos(Math.toRadians(player.getRotation()));
                 double changeY = Math.sin(Math.toRadians(player.getRotation()));
-                player.setX(player.getX() + changeX);
-                player.setY(player.getY() + changeY);
+                player.setX(player.getX() + changeX * 2);
+                player.setY(player.getY() + changeY * 2);
             }
-            
+            if (gameData.getKeys().isPressed(GameKeys.SPACE)) {
+                Collection<? extends BulletSPI> bulletSPIs = getBulletSPIs();
+                for (BulletSPI bulletSPI : bulletSPIs) {
+                    Entity bullet = bulletSPI.createBullet(player, gameData);
+                    world.addEntity(bullet);
+                }
+            }
+
         if (player.getX() < 0) {
             player.setX(1);
         }
