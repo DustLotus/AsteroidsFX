@@ -15,31 +15,13 @@ public class BulletPlugin implements IGamePluginService {
 
     }
 
-
-    public void createBullet(GameData gameData, World world, Entity shooter) {
-        Bullet bullet = new Bullet();
-        bullet.setX(shooter.getX() + calculateOffsetX(shooter)); // Calculate based on shooter's facing
-        bullet.setY(shooter.getY() + calculateOffsetY(shooter)); // Calculate based on shooter's facing
-        bullet.setRadians(Math.toRadians(shooter.getRotation()));
-        bullet.setSpeed(200); // Example speed
-        // Set other bullet properties here
-
-        world.addEntity(bullet);
-    }
-
-    private double calculateOffsetX(Entity shooter) {
-        // Implement logic to calculate the X offset for bullet creation
-        return 0; // Placeholder
-    }
-
-    private double calculateOffsetY(Entity shooter) {
-        // Implement logic to calculate the Y offset for bullet creation
-        return 0; // Placeholder
-    }
-
     @Override
     public void stop(GameData gameData, World world) {
-        world.getEntities(Bullet.class).forEach(world::removeEntity);
+        for (Entity e : world.getEntities()) {
+            if (e.getClass() == Bullet.class) {
+                world.removeEntity(e);
+            }
+        }
     }
 
 }

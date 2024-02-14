@@ -20,26 +20,19 @@ public class PlayerControlSystem implements IEntityProcessingService {
             
         for (Entity player : world.getEntities(Player.class)) {
             if (gameData.getKeys().isDown(GameKeys.LEFT)) {
-                player.setRotation(player.getRotation() - 2);
+                player.setRotation(player.getRotation() - 5);                
             }
             if (gameData.getKeys().isDown(GameKeys.RIGHT)) {
-                player.setRotation(player.getRotation() + 2);
+                player.setRotation(player.getRotation() + 5);                
             }
             if (gameData.getKeys().isDown(GameKeys.UP)) {
                 double changeX = Math.cos(Math.toRadians(player.getRotation()));
                 double changeY = Math.sin(Math.toRadians(player.getRotation()));
-                player.setX(player.getX() + changeX * 1);
-                player.setY(player.getY() + changeY * 1);
+                player.setX(player.getX() + changeX);
+                player.setY(player.getY() + changeY);
             }
-            if (gameData.getKeys().isDown(GameKeys.SPACE)) {
-                Collection<? extends BulletSPI> bulletSPIs = getBulletSPIs();
-                for (BulletSPI bulletSPI : bulletSPIs) {
-                    Entity bullet = bulletSPI.createBullet(player, gameData);
-                    world.addEntity(bullet);
-                }
-            }
-
-            if (player.getX() < 0) {
+            
+        if (player.getX() < 0) {
             player.setX(1);
         }
 
