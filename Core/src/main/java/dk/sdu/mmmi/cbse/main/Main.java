@@ -44,28 +44,28 @@ public class Main extends Application {
 
         Scene scene = new Scene(gameWindow);
         scene.setOnKeyPressed(event -> {
-            if (event.getCode().equals(KeyCode.LEFT)) {
-                gameData.getKeys().setKey(GameKeys.LEFT, true);
+            if (event.getCode().equals(KeyCode.A)) {
+                gameData.getKeys().setKey(GameKeys.A, true);
             }
-            if (event.getCode().equals(KeyCode.RIGHT)) {
-                gameData.getKeys().setKey(GameKeys.RIGHT, true);
+            if (event.getCode().equals(KeyCode.D)) {
+                gameData.getKeys().setKey(GameKeys.D, true);
             }
-            if (event.getCode().equals(KeyCode.UP)) {
-                gameData.getKeys().setKey(GameKeys.UP, true);
+            if (event.getCode().equals(KeyCode.W)) {
+                gameData.getKeys().setKey(GameKeys.W, true);
             }
             if (event.getCode().equals(KeyCode.SPACE)) {
                 gameData.getKeys().setKey(GameKeys.SPACE, true);
             }
         });
         scene.setOnKeyReleased(event -> {
-            if (event.getCode().equals(KeyCode.LEFT)) {
-                gameData.getKeys().setKey(GameKeys.LEFT, false);
+            if (event.getCode().equals(KeyCode.A)) {
+                gameData.getKeys().setKey(GameKeys.A, false);
             }
-            if (event.getCode().equals(KeyCode.RIGHT)) {
-                gameData.getKeys().setKey(GameKeys.RIGHT, false);
+            if (event.getCode().equals(KeyCode.D)) {
+                gameData.getKeys().setKey(GameKeys.D, false);
             }
-            if (event.getCode().equals(KeyCode.UP)) {
-                gameData.getKeys().setKey(GameKeys.UP, false);
+            if (event.getCode().equals(KeyCode.W)) {
+                gameData.getKeys().setKey(GameKeys.W, false);
             }
             if (event.getCode().equals(KeyCode.SPACE)) {
                 gameData.getKeys().setKey(GameKeys.SPACE, false);

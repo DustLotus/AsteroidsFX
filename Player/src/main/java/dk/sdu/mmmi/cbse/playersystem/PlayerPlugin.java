@@ -22,7 +22,19 @@ public class PlayerPlugin implements IGamePluginService {
     private Entity createPlayerShip(GameData gameData) {
 
         Entity playerShip = new Player();
-        playerShip.setPolygonCoordinates(-5,-5,10,0,-5,5);
+        playerShip.setPolygonCoordinates(
+                11, 0,    // Rightmost point (head of the star, made longer)
+                1, -3,    // Inner point between top and right arm
+                1, -10,   // Top arm
+                -4, -4,    // Inner point between top and left upper arm
+                -9, -6,   // Left upper arm
+                -6, 0,    // Inner left point
+                -9, 6,    // Left lower arm
+                -4, 4,     // Inner point between left lower and right lower arm
+                1, 10,    // Right lower arm
+                1, 3      // Inner point between right lower arm and head
+        );
+
         playerShip.setX(gameData.getDisplayHeight()/2);
         playerShip.setY(gameData.getDisplayWidth()/2);
         return playerShip;
