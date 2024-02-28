@@ -7,5 +7,7 @@ public interface IGamePluginService {
 
     void start(GameData gameData, World world);
 
+    void process(GameData gameData, World world);
+
     void stop(GameData gameData, World world);
 }

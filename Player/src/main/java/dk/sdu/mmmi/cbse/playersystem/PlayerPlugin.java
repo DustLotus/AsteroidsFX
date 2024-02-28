@@ -19,6 +19,10 @@ public class PlayerPlugin implements IGamePluginService {
         world.addEntity(player);
     }
 
+    public void process(GameData gameData, World world) {
+
+    }
+
     private Entity createPlayerShip(GameData gameData) {
 
         Entity playerShip = new Player();
