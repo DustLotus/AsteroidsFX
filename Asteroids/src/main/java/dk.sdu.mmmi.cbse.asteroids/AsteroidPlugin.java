@@ -17,6 +17,11 @@ public class AsteroidPlugin implements IGamePluginService {
     public void start(GameData gameData, World world) {
         // Set initial last spawn time to ensure an asteroid spawns immediately when the game starts
         lastSpawnTime = System.currentTimeMillis() - spawnInterval;
+
+        Entity asteroid = createAsteroid(gameData);
+
+        
+        System.out.println("Asteroid Start");
     }
 
     @Override
@@ -31,7 +36,7 @@ public class AsteroidPlugin implements IGamePluginService {
     }
 
     private Entity createAsteroid(GameData gameData) {
-        Asteroid asteroid = new Asteroid(rand.nextInt(3) + 1); // Random size
+        Entity asteroid = new Asteroid(rand.nextInt(3) + 1); // Random size
         asteroid.setX(rand.nextDouble() * gameData.getDisplayWidth()); // Random X position
         asteroid.setY(rand.nextDouble() * gameData.getDisplayHeight()); // Random Y position
         asteroid.setSpeed(1 + rand.nextDouble() * 4); // Speed between 1 and 5
