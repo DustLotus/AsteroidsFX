@@ -29,7 +29,7 @@ public class AsteroidPlugin implements IGamePluginService {
 
     private Entity createAsteroid(GameData gameData) {
         Entity asteroid = new Asteroid(random.nextInt(3) + 1);
-        asteroid.setSize(20 + random.nextInt(20)); // Size varies between 20 and 40 for visibility
+        asteroid.setSize(10 + random.nextInt(40)); // Size varies between 20 and 40 for visibility
         int edge = random.nextInt(4); // Random edge: 0=top, 1=bottom, 2=left, 3=right
         float size = asteroid.getSize(); // Use asteroid's size for edge calculations
 
@@ -57,15 +57,15 @@ public class AsteroidPlugin implements IGamePluginService {
 
         // Set polygonal shape resembling an asteroid
         asteroid.setPolygonCoordinates(
-                -size * 0.3, size * 0.4, // Vertex 1
-                size * 0.1, size * 0.5,  // Vertex 2
-                size * 0.4, size * 0.2,  // Vertex 3
-                size * 0.5, -size * 0.1, // Vertex 4
-                size * 0.3, -size * 0.5, // Vertex 5
-                0, -size * 0.6,          // Vertex 6
-                -size * 0.4, -size * 0.4,// Vertex 7
-                -size * 0.6, -size * 0.1,// Vertex 8
-                -size * 0.5, size * 0.1  // Vertex 9
+                -size * 0.6, size * 0.8, // Vertex 1
+                size * 0.2, size * 1.0,  // Vertex 2
+                size * 0.8, size * 0.4,  // Vertex 3
+                size * 1.0, -size * 0.2, // Vertex 4
+                size * 0.6, -size * 1.0, // Vertex 5
+                0, -size * 1.2,          // Vertex 6
+                -size * 0.8, -size * 0.8,// Vertex 7
+                -size * 1.2, -size * 0.2,// Vertex 8
+                -size * 1.0, size * 0.2  // Vertex 9
         );
 
         return asteroid;

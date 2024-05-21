@@ -20,21 +20,21 @@ public class PlayerControlSystemTest {
     void setUp() {
         playerControlSystem = new PlayerControlSystem();
         gameData = mock(GameData.class);
-
-        // Correctly mock the gameData to provide display dimensions
         when(gameData.getDisplayWidth()).thenReturn(800);
         when(gameData.getDisplayHeight()).thenReturn(600);
 
-        // Mocking GameKeys
         GameKeys keys = mock(GameKeys.class);
-        when(keys.isDown(anyInt())).thenReturn(false);  // Default to no key pressed
+        when(keys.isDown(GameKeys.A)).thenReturn(false);
+        when(keys.isDown(GameKeys.D)).thenReturn(false);
+        when(keys.isDown(GameKeys.W)).thenReturn(false);
+        when(keys.isDown(GameKeys.SPACE)).thenReturn(false);
         when(gameData.getKeys()).thenReturn(keys);
 
         world = new World();
         player = new Entity();
-        player.setRotation(0); // Initial rotation
-        player.setX(100); // Initial X position
-        player.setY(100); // Initial Y position
+        player.setRotation(0);
+        player.setX(100);
+        player.setY(100);
 
         world.addEntity(player);
     }
@@ -43,14 +43,14 @@ public class PlayerControlSystemTest {
     void testHandleMovementWithLeftKey() {
         when(gameData.getKeys().isDown(GameKeys.A)).thenReturn(true);
         playerControlSystem.process(gameData, world);
-        assertTrue(player.getRotation() < 0, "Rotation should decrease when moving left");
+        assertTrue(player.getRotation() < 0, "Rotation should decrease when A key is pressed.");
     }
 
     @Test
     void testHandleMovementWithRightKey() {
         when(gameData.getKeys().isDown(GameKeys.D)).thenReturn(true);
         playerControlSystem.process(gameData, world);
-        assertTrue(player.getRotation() > 0, "Rotation should increase when moving right");
+        assertTrue(player.getRotation() > 0, "Rotation should increase when D key is pressed.");
     }
 
     @Test
@@ -68,21 +68,21 @@ public class PlayerControlSystemTest {
         // Test wrapping from left to right
         player.setX(-1);
         playerControlSystem.process(gameData, world);
-        assertEquals(gameData.getDisplayWidth(), player.getX(), "Should wrap to right when moving beyond left edge");
+        assertEquals(800, player.getX(), "Player should wrap to the right side when moving beyond left edge");
 
         // Test wrapping from right to left
-        player.setX(gameData.getDisplayWidth() + 1);
+        player.setX(801);
         playerControlSystem.process(gameData, world);
-        assertEquals(0, player.getX(), "Should wrap to left when moving beyond right edge");
+        assertEquals(0, player.getX(), "Player should wrap to the left side when moving beyond right edge");
 
         // Test wrapping from top to bottom
-        player.setY(gameData.getDisplayHeight() + 1);
+        player.setY(601);
         playerControlSystem.process(gameData, world);
-        assertEquals(0, player.getY(), "Should wrap to bottom when moving beyond top edge");
+        assertEquals(0, player.getY(), "Player should wrap to the bottom when moving beyond top edge");
 
         // Test wrapping from bottom to top
         player.setY(-1);
         playerControlSystem.process(gameData, world);
-        assertEquals(gameData.getDisplayHeight(), player.getY(), "Should wrap to top when moving beyond bottom edge");
+        assertEquals(600, player.getY(), "Player should wrap to the top when moving beyond bottom edge");
     }
 }

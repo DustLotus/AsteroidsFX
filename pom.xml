@@ -19,6 +19,7 @@
         <module>CommonBullet</module>
         <module>Enemy</module>
         <module>Asteroid</module>
+        <module>CollisionSystem</module>
     </modules>
     <properties>
         <java>java</java>

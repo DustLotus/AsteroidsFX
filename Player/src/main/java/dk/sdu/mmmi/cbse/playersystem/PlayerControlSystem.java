@@ -16,7 +16,6 @@ public class PlayerControlSystem implements IEntityProcessingService {
 
     @Override
     public void process(GameData gameData, World world) {
-
         for (Entity player : world.getEntities(Player.class)) {
             handleMovement(gameData, player);
             handleShooting(gameData, world, player);
@@ -25,13 +24,13 @@ public class PlayerControlSystem implements IEntityProcessingService {
     }
 
     private void handleMovement(GameData gameData, Entity player) {
-        if (gameData.getKeys().isDown(GameKeys.A)) { // 'A' is for turning left
+        if (gameData.getKeys().isDown(GameKeys.A)) {
             player.setRotation(player.getRotation() - 3);
         }
-        if (gameData.getKeys().isDown(GameKeys.D)) { // 'D' is for turning right
+        if (gameData.getKeys().isDown(GameKeys.D)) {
             player.setRotation(player.getRotation() + 3);
         }
-        if (gameData.getKeys().isDown(GameKeys.W)) { // 'W' is for moving forward
+        if (gameData.getKeys().isDown(GameKeys.W)) {
             double changeX = Math.cos(Math.toRadians(player.getRotation()));
             double changeY = Math.sin(Math.toRadians(player.getRotation()));
             player.setX(player.getX() + changeX * 2);
@@ -48,21 +47,15 @@ public class PlayerControlSystem implements IEntityProcessingService {
     }
 
     private void enforceScreenBounds(Entity entity, GameData gameData) {
-        // When moving beyond the left edge, appear on the right
         if (entity.getX() < 0) {
             entity.setX(gameData.getDisplayWidth());
-        }
-        // When moving beyond the right edge, appear on the left
-        if (entity.getX() > gameData.getDisplayWidth()) {
+        } else if (entity.getX() > gameData.getDisplayWidth()) {
             entity.setX(0);
         }
-        // When moving beyond the top edge, appear on the bottom
-        if (entity.getY() > gameData.getDisplayHeight()) {
-            entity.setY(0);
-        }
-        // When moving beyond the bottom edge, appear on the top
         if (entity.getY() < 0) {
             entity.setY(gameData.getDisplayHeight());
+        } else if (entity.getY() > gameData.getDisplayHeight()) {
+            entity.setY(0);
         }
     }
 

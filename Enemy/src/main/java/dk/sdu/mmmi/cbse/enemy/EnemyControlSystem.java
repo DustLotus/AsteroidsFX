@@ -9,49 +9,49 @@ import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import java.util.Collection;
 import java.util.Random;
 import java.util.ServiceLoader;
-
-import static java.util.stream.Collectors.toList;
+import java.util.stream.Collectors;
 
 public class EnemyControlSystem implements IEntityProcessingService {
 
     private Random random = new Random();
+    private Collection<BulletSPI> bulletServices;
 
-    // Timer variables for rotation and shooting
-    private double timeUntilNextRotation = 0;
-    private double timeUntilNextShot = 0;
+    public EnemyControlSystem() {
+        bulletServices = ServiceLoader.load(BulletSPI.class).stream()
+                .map(ServiceLoader.Provider::get)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public void process(GameData gameData, World world) {
-        double delta = gameData.getDelta();
-
         for (Entity enemy : world.getEntities(Enemy.class)) {
-            // Rotation timer
-            if (timeUntilNextRotation <= 0) {
-                timeUntilNextRotation = 1 + random.nextDouble() * 2; // Reset timer between 1 to 3 seconds
-                int rotationChange = random.nextInt(360) - 180; // Change rotation between -180 to 180 degrees
-                enemy.setRotation(enemy.getRotation() + rotationChange);
-            } else {
-                timeUntilNextRotation -= delta; // Decrement timer by elapsed time
-            }
-
-            // Continuous forward movement
-            double changeX = Math.cos(Math.toRadians(enemy.getRotation())) * enemy.getSpeed();
-            double changeY = Math.sin(Math.toRadians(enemy.getRotation())) * enemy.getSpeed();
-            enemy.setX(enemy.getX() + changeX * delta);
-            enemy.setY(enemy.getY() + changeY * delta);
-
-            // Shooting timer
-            if (timeUntilNextShot <= 0) {
-                timeUntilNextShot = 1 + random.nextDouble() * 2; // Reset timer between 1 to 3 seconds
-                for (BulletSPI bullet : getBulletSPIs()) {
-                    world.addEntity(bullet.createBullet(enemy, gameData));
-                }
-            } else {
-                timeUntilNextShot -= delta; // Decrement timer by elapsed time
-            }
-
-            // Keep enemy within screen bounds
+            handleRotation(enemy);
+            handleMovement(enemy);
+            handleShooting(enemy, gameData, world);
             enforceScreenBounds(enemy, gameData);
+        }
+    }
+
+    private void handleRotation(Entity enemy) {
+        int rotationChange = random.nextInt(6) - 3; // Randomly rotates between -3 and 2 degrees
+        enemy.setRotation(enemy.getRotation() + rotationChange);
+    }
+
+    private void handleMovement(Entity enemy) {
+        double changeX = Math.cos(Math.toRadians(enemy.getRotation()));
+        double changeY = Math.sin(Math.toRadians(enemy.getRotation()));
+        enemy.setX(enemy.getX() + changeX);
+        enemy.setY(enemy.getY() + changeY);
+    }
+
+    private void handleShooting(Entity enemy, GameData gameData, World world) {
+        double shootingTimer = enemy.getTimer("shooting");
+        if (shootingTimer <= 0) {
+            double shootingDuration = 0.5 + random.nextDouble(); // shooting every 0.5 to 1.5 seconds
+            enemy.setTimer("shooting", shootingDuration);
+            bulletServices.forEach(bulletService -> world.addEntity(bulletService.createBullet(enemy, gameData)));
+        } else {
+            enemy.setTimer("shooting", shootingTimer - gameData.getDelta());
         }
     }
 
@@ -68,9 +68,5 @@ public class EnemyControlSystem implements IEntityProcessingService {
         if (entity.getY() < 0) {
             entity.setY(gameData.getDisplayHeight());
         }
-    }
-
-    private Collection<? extends BulletSPI> getBulletSPIs() {
-        return ServiceLoader.load(BulletSPI.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
 }

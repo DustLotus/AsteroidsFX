@@ -4,6 +4,7 @@ import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.GameKeys;
 import dk.sdu.mmmi.cbse.common.data.World;
+import dk.sdu.mmmi.cbse.common.services.ICollisionDetectionService;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
@@ -92,13 +93,17 @@ public class Main extends Application {
 
     private void render() {
         new AnimationTimer() {
-            private long then = 0;
+            private long then = System.nanoTime(); // Initialize then with the current nano-time
 
             @Override
             public void handle(long now) {
-                update();
-                draw();
-                gameData.getKeys().update();
+                float delta = (now - then) / 1_000_000_000.0f; // Calculate delta in seconds
+                then = now; // Update then to the current time for the next frame
+                gameData.setDelta(delta); // Set the calculated delta in GameData
+
+                update(); // Process game logic updates
+                draw(); // Render the updated game state
+                gameData.getKeys().update(); // Optionally update the state of keys or other input if necessary
             }
 
         }.start();
@@ -110,6 +115,10 @@ public class Main extends Application {
         for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
             entityProcessorService.process(gameData, world);
         }
+        // Perform collision detection and handling
+        ICollisionDetectionService collisionService = new CollisionDetectionSystem();
+        collisionService.process(world);
+
 //        for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
 //            postEntityProcessorService.process(gameData, world);
 //        }
