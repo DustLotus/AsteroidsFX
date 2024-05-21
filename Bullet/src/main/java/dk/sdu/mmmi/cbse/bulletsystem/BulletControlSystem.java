@@ -6,6 +6,8 @@ import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 
+import java.util.UUID;
+
 public class BulletControlSystem implements IEntityProcessingService, BulletSPI {
 
     @Override
@@ -24,6 +26,8 @@ public class BulletControlSystem implements IEntityProcessingService, BulletSPI 
     @Override
     public Entity createBullet(Entity shooter, GameData gameData) {
         Entity bullet = new Bullet();
+        bullet.setOwnerId(UUID.fromString(shooter.getID()));
+        bullet.setType("bullet");
         bullet.setSpeed(10); // Set bullet speed
         bullet.setX(shooter.getX()); // Initial X position from shooter
         bullet.setY(shooter.getY()); // Initial Y position from shooter

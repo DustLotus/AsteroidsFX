@@ -3,9 +3,17 @@ package dk.sdu.mmmi.cbse.asteroid;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 
 public class Asteroid extends Entity {
-    private int size; // Large = 3, Medium = 2, Small = 1
+    private int sizeLevel;
 
-    public Asteroid(int size) {
-        this.size = size;
+    public Asteroid(int sizeLevel) {
+        this.sizeLevel = sizeLevel;
+    }
+
+    public int getSizeLevel() {
+        return sizeLevel;
+    }
+
+    public void setSizeLevel(int sizeLevel) {
+        this.sizeLevel = sizeLevel;
     }
 }

@@ -10,6 +10,7 @@ import java.util.Random;
 public class EnemyPlugin implements IGamePluginService {
 
     private Random random = new Random();
+    private static final int MAX_ENEMIES = 5; // Maximum number of enemies
 
     @Override
     public void start(GameData gameData, World world) {
@@ -18,7 +19,12 @@ public class EnemyPlugin implements IGamePluginService {
 
     @Override
     public void process(GameData gameData, World world) {
-
+        // Ensure the maximum number of enemies is maintained
+        if (world.getEntities(Enemy.class).size() < MAX_ENEMIES) {
+            Entity enemy = createEnemyShip(gameData);
+            world.addEntity(enemy);
+            System.out.println("Enemy dynamically spawned: X=" + enemy.getX() + ", Y=" + enemy.getY());
+        }
     }
 
     @Override
@@ -27,18 +33,15 @@ public class EnemyPlugin implements IGamePluginService {
     }
 
     private void spawnEnemies(GameData gameData, World world) {
-        int currentEnemyCount = world.getEntities(Enemy.class).size();
-        int maxEnemies = 5;
-
-        while (currentEnemyCount < maxEnemies) {
+        for (int i = 0; i < MAX_ENEMIES; i++) {
             Entity enemy = createEnemyShip(gameData);
             world.addEntity(enemy);
-            currentEnemyCount++;
         }
     }
 
     private Entity createEnemyShip(GameData gameData) {
         Entity enemyShip = new Enemy();
+        enemyShip.setType("enemyShip");
         float size = 30; // Assuming a size for visibility calculations
         int edge = random.nextInt(4); // Random edge: 0=top, 1=bottom, 2=left, 3=right
 
@@ -66,10 +69,10 @@ public class EnemyPlugin implements IGamePluginService {
 
         // Set the polygonal shape for the enemy ship
         enemyShip.setPolygonCoordinates(
-                7, 0,    // Rightmost point (head of the star, made longer)
-                -6, -5,   // Left upper arm
-                -4, 0,    // Inner left point
-                -6, 5   // Left lower arm
+                5, 0,    // Rightmost point (head of the star, made longer)
+                -8, -5,   // Left upper arm
+                -6, 0,    // Inner left point
+                -8, 5   // Left lower arm
         );
 
         // Debug printout for spawning information
@@ -78,5 +81,4 @@ public class EnemyPlugin implements IGamePluginService {
 
         return enemyShip;
     }
-
 }

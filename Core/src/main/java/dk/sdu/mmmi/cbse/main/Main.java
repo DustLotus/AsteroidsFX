@@ -1,5 +1,6 @@
 package dk.sdu.mmmi.cbse.main;
 
+import dk.sdu.mmmi.cbse.collision.CollisionDetectionSystem;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.GameData;
 import dk.sdu.mmmi.cbse.common.data.GameKeys;
@@ -8,10 +9,7 @@ import dk.sdu.mmmi.cbse.common.services.ICollisionDetectionService;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
 import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +30,8 @@ public class Main extends Application {
     private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
 
     private final Pane gameWindow = new Pane();
+
+    private ICollisionDetectionService collisionService;
 
     public static void main(String[] args) {
         launch(Main.class);
@@ -73,6 +73,8 @@ public class Main extends Application {
             }
         });
 
+        collisionService = new CollisionDetectionSystem();  // Initialize the collision service once here
+
         // Lookup all Game Plugins using ServiceLoader
         for (IGamePluginService iGamePlugin : getPluginServices()) {
             iGamePlugin.start(gameData, world);
@@ -110,19 +112,41 @@ public class Main extends Application {
     }
 
     private void update() {
-
         // Update
         for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
             entityProcessorService.process(gameData, world);
         }
         // Perform collision detection and handling
-        ICollisionDetectionService collisionService = new CollisionDetectionSystem();
         collisionService.process(world);
+
+        // Ensure minimum number of asteroids
+        for (IGamePluginService gamePlugin : getPluginServices()) {
+            gamePlugin.process(gameData, world);
+        }
 
 //        for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
 //            postEntityProcessorService.process(gameData, world);
 //        }
+
+        // Remove polygons of removed entities
+        world.getEntities().forEach(entity -> {
+            if (!polygons.containsKey(entity)) {
+                Polygon polygon = new Polygon(entity.getPolygonCoordinates());
+                polygons.put(entity, polygon);
+                gameWindow.getChildren().add(polygon);
+            }
+        });
+
+        // Remove polygons of removed entities
+        polygons.keySet().removeIf(entity -> {
+            if (!world.getEntities().contains(entity)) {
+                gameWindow.getChildren().remove(polygons.get(entity));
+                return true;
+            }
+            return false;
+        });
     }
+
 
     private void draw() {
         for (Entity entity : world.getEntities()) {

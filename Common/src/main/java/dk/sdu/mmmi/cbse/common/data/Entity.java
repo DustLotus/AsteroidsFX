@@ -8,6 +8,7 @@ import java.util.UUID;
 public class Entity implements Serializable {
 
     private final UUID ID = UUID.randomUUID(); // Unique identifier for each entity
+    private UUID ownerId;
 
     private double[] polygonCoordinates; // Stores the shape of the entity in a coordinate system
     private double x; // X-coordinate of the entity's position
@@ -16,6 +17,7 @@ public class Entity implements Serializable {
     private double speed; // Movement speed of the entity
     private float size; // Size of the entity, can be used for rendering and collision detection
     private Map<String, Double> timers = new HashMap<>(); // Stores various timers for the entity
+    private String type; // e.g., "player", "enemy", "asteroid", "bullet"
 
     // Returns the string representation of the entity's UUID
     public String getID() {
@@ -97,5 +99,22 @@ public class Entity implements Serializable {
         double timeLeft = getTimer(key);
         timeLeft = Math.max(0, timeLeft - delta);
         timers.put(key, timeLeft);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+
+    public UUID getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(UUID ownerId) {
+        this.ownerId = ownerId;
     }
 }

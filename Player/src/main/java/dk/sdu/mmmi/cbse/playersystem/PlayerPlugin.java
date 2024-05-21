@@ -27,6 +27,7 @@ public class PlayerPlugin implements IGamePluginService {
     private Entity createPlayerShip(GameData gameData) {
 
         Entity playerShip = new Player();
+        playerShip.setType("playerShip");
         playerShip.setPolygonCoordinates(
                 11, 0,    // Rightmost point (head of the star, made longer)
                 1, -3,    // Inner point between top and right arm

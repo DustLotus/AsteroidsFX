@@ -10,13 +10,14 @@ import java.util.Random;
 public class AsteroidPlugin implements IGamePluginService {
 
     private Random random = new Random();
+    private static final int MAX_ASTEROIDS = 15; // Maximum number of asteroids
+    private static final int MIN_ASTEROIDS = 5; // Minimum number of asteroids
 
     @Override
     public void start(GameData gameData, World world) {
-        // Determine how many asteroids to spawn at the start
-        int numAsteroids = 5; // For example, start with 5 asteroids
-        for (int i = 0; i < numAsteroids; i++) {
-            Entity asteroid = createAsteroid(gameData);
+        // Spawn initial asteroids
+        for (int i = 0; i < MAX_ASTEROIDS; i++) {
+            Entity asteroid = createAsteroid(gameData, 3); // Initial asteroids with max size level
             world.addEntity(asteroid);
             System.out.println("Asteroid added at start: X=" + asteroid.getX() + ", Y=" + asteroid.getY());
         }
@@ -24,12 +25,25 @@ public class AsteroidPlugin implements IGamePluginService {
 
     @Override
     public void process(GameData gameData, World world) {
-        // Process method remains empty if no dynamic spawning is needed during the game
+        // Ensure the minimum number of asteroids is maintained
+        while (world.getEntitiesByType("asteroid").size() < MIN_ASTEROIDS) {
+            Entity asteroid = createAsteroid(gameData, 3); // Spawn new asteroids with max size level
+            world.addEntity(asteroid);
+            System.out.println("Asteroid dynamically spawned: X=" + asteroid.getX() + ", Y=" + asteroid.getY());
+        }
     }
 
-    private Entity createAsteroid(GameData gameData) {
-        Entity asteroid = new Asteroid(random.nextInt(3) + 1);
-        asteroid.setSize(10 + random.nextInt(40)); // Size varies between 20 and 40 for visibility
+    @Override
+    public void stop(GameData gameData, World world) {
+        for (Entity e : world.getEntitiesByType("asteroid")) {
+            world.removeEntity(e);
+        }
+    }
+
+    private Entity createAsteroid(GameData gameData, int sizeLevel) {
+        Asteroid asteroid = new Asteroid(sizeLevel);
+        asteroid.setType("asteroid");
+        asteroid.setSize(10 + random.nextInt(20)); // Size varies between 10 and 30
         int edge = random.nextInt(4); // Random edge: 0=top, 1=bottom, 2=left, 3=right
         float size = asteroid.getSize(); // Use asteroid's size for edge calculations
 
@@ -69,12 +83,5 @@ public class AsteroidPlugin implements IGamePluginService {
         );
 
         return asteroid;
-    }
-
-    @Override
-    public void stop(GameData gameData, World world) {
-        for (Entity e : world.getEntities(Asteroid.class)) {
-            world.removeEntity(e);
-        }
     }
 }

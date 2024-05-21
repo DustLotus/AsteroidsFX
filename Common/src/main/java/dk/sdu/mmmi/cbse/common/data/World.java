@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author jcs
  */
+
 public class World {
 
     private final Map<String, Entity> entityMap = new ConcurrentHashMap<>();
@@ -31,20 +32,30 @@ public class World {
         return entityMap.values();
     }
 
-    public <E extends Entity> List<Entity> getEntities(Class<E>... entityTypes) {
-        List<Entity> r = new ArrayList<>();
+    public List<Entity> getEntitiesByType(String type) {
+        List<Entity> entities = new ArrayList<>();
         for (Entity e : getEntities()) {
-            for (Class<E> entityType : entityTypes) {
-                if (entityType.equals(e.getClass())) {
-                    r.add(e);
-                }
+            if (type.equals(e.getType())) {
+                entities.add(e);
             }
         }
-        return r;
+        return entities;
     }
 
     public Entity getEntity(String ID) {
         return entityMap.get(ID);
     }
 
+    @SafeVarargs
+    public final <E extends Entity> List<Entity> getEntities(Class<E>... entityTypes) {
+        List<Entity> entities = new ArrayList<>();
+        for (Entity e : getEntities()) {
+            for (Class<E> entityType : entityTypes) {
+                if (entityType.isInstance(e)) {
+                    entities.add(e);
+                }
+            }
+        }
+        return entities;
+    }
 }
