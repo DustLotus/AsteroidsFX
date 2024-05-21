@@ -2,10 +2,10 @@ package dk.sdu.mmmi.cbse.common.data;
 
 public class GameData {
 
-    private int displayWidth  = 800 ;
+    private int displayWidth = 800;
     private int displayHeight = 800;
     private final GameKeys keys = new GameKeys();
-
+    private float delta; // Time elapsed since the last frame/update
 
     public GameKeys getKeys() {
         return keys;
@@ -27,5 +27,12 @@ public class GameData {
         return displayHeight;
     }
 
+    public void setDelta(float delta) {
+        this.delta = delta;
+    }
+
+    public float getDelta() {
+        return delta;
+    }
 
 }

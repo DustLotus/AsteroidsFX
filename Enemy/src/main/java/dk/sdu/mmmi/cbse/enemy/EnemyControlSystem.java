@@ -16,25 +16,38 @@ public class EnemyControlSystem implements IEntityProcessingService {
 
     private Random random = new Random();
 
+    // Timer variables for rotation and shooting
+    private double timeUntilNextRotation = 0;
+    private double timeUntilNextShot = 0;
+
     @Override
     public void process(GameData gameData, World world) {
+        double delta = gameData.getDelta();
 
         for (Entity enemy : world.getEntities(Enemy.class)) {
-            // Random rotation change
-            int rotationChange = random.nextInt(6) - 3; // Randomly rotates between -3 and 2 degrees
-            enemy.setRotation(enemy.getRotation() + rotationChange);
+            // Rotation timer
+            if (timeUntilNextRotation <= 0) {
+                timeUntilNextRotation = 1 + random.nextDouble() * 2; // Reset timer between 1 to 3 seconds
+                int rotationChange = random.nextInt(360) - 180; // Change rotation between -180 to 180 degrees
+                enemy.setRotation(enemy.getRotation() + rotationChange);
+            } else {
+                timeUntilNextRotation -= delta; // Decrement timer by elapsed time
+            }
 
             // Continuous forward movement
-            double changeX = Math.cos(Math.toRadians(enemy.getRotation()));
-            double changeY = Math.sin(Math.toRadians(enemy.getRotation()));
-            enemy.setX(enemy.getX() + changeX);
-            enemy.setY(enemy.getY() + changeY);
+            double changeX = Math.cos(Math.toRadians(enemy.getRotation())) * enemy.getSpeed();
+            double changeY = Math.sin(Math.toRadians(enemy.getRotation())) * enemy.getSpeed();
+            enemy.setX(enemy.getX() + changeX * delta);
+            enemy.setY(enemy.getY() + changeY * delta);
 
-            // Random shooting logic
-            if (random.nextBoolean()) { // Randomly decides whether to shoot
+            // Shooting timer
+            if (timeUntilNextShot <= 0) {
+                timeUntilNextShot = 1 + random.nextDouble() * 2; // Reset timer between 1 to 3 seconds
                 for (BulletSPI bullet : getBulletSPIs()) {
                     world.addEntity(bullet.createBullet(enemy, gameData));
                 }
+            } else {
+                timeUntilNextShot -= delta; // Decrement timer by elapsed time
             }
 
             // Keep enemy within screen bounds
@@ -42,11 +55,19 @@ public class EnemyControlSystem implements IEntityProcessingService {
         }
     }
 
-    private void enforceScreenBounds(Entity enemy, GameData gameData) {
-        if (enemy.getX() < 0) enemy.setX(1);
-        if (enemy.getX() > gameData.getDisplayWidth()) enemy.setX(gameData.getDisplayWidth() - 1);
-        if (enemy.getY() < 0) enemy.setY(1);
-        if (enemy.getY() > gameData.getDisplayHeight()) enemy.setY(gameData.getDisplayHeight() - 1);
+    private void enforceScreenBounds(Entity entity, GameData gameData) {
+        if (entity.getX() < 0) {
+            entity.setX(gameData.getDisplayWidth());
+        }
+        if (entity.getX() > gameData.getDisplayWidth()) {
+            entity.setX(0);
+        }
+        if (entity.getY() > gameData.getDisplayHeight()) {
+            entity.setY(0);
+        }
+        if (entity.getY() < 0) {
+            entity.setY(gameData.getDisplayHeight());
+        }
     }
 
     private Collection<? extends BulletSPI> getBulletSPIs() {
