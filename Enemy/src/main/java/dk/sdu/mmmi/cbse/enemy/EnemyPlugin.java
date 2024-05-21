@@ -11,32 +11,34 @@ public class EnemyPlugin implements IGamePluginService {
 
     private Random random = new Random();
     private static final int MAX_ENEMIES = 5; // Maximum number of enemies
+    private static final int SPAWN_INTERVAL = 6000; // Interval in milliseconds (6 seconds)
+    private long lastSpawnTime = 0;
 
     @Override
     public void start(GameData gameData, World world) {
-        spawnEnemies(gameData, world);
+        // Spawn initial enemies
+        for (int i = 0; i < MAX_ENEMIES; i++) {
+            Entity enemy = createEnemyShip(gameData);
+            world.addEntity(enemy);
+            System.out.println("Enemy added at start: X=" + enemy.getX() + ", Y=" + enemy.getY());
+        }
     }
 
     @Override
     public void process(GameData gameData, World world) {
-        // Ensure the maximum number of enemies is maintained
-        if (world.getEntities(Enemy.class).size() < MAX_ENEMIES) {
-            Entity enemy = createEnemyShip(gameData);
+        // Check the time elapsed since the last spawn
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSpawnTime >= SPAWN_INTERVAL && world.getEntitiesByType("enemyShip").size() < MAX_ENEMIES) {
+            Entity enemy = createEnemyShip(gameData); // Spawn new enemies
             world.addEntity(enemy);
             System.out.println("Enemy dynamically spawned: X=" + enemy.getX() + ", Y=" + enemy.getY());
+            lastSpawnTime = currentTime; // Reset the spawn timer
         }
     }
 
     @Override
     public void stop(GameData gameData, World world) {
-        world.getEntities(Enemy.class).forEach(world::removeEntity);
-    }
-
-    private void spawnEnemies(GameData gameData, World world) {
-        for (int i = 0; i < MAX_ENEMIES; i++) {
-            Entity enemy = createEnemyShip(gameData);
-            world.addEntity(enemy);
-        }
+        // No need to remove enemies on stop
     }
 
     private Entity createEnemyShip(GameData gameData) {
@@ -69,10 +71,10 @@ public class EnemyPlugin implements IGamePluginService {
 
         // Set the polygonal shape for the enemy ship
         enemyShip.setPolygonCoordinates(
-                5, 0,    // Rightmost point (head of the star, made longer)
-                -8, -5,   // Left upper arm
-                -6, 0,    // Inner left point
-                -8, 5   // Left lower arm
+                10, 0,   // Rightmost point (head of the star, made longer)
+                -16, -10, // Left upper arm
+                -12, 0,  // Inner left point
+                -16, 10  // Left lower arm
         );
 
         // Debug printout for spawning information

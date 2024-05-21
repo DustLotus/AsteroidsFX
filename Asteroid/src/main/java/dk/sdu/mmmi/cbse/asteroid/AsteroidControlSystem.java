@@ -14,7 +14,7 @@ public class AsteroidControlSystem implements IEntityProcessingService {
     public void process(GameData gameData, World world) {
         List<Entity> asteroidsToRemove = new ArrayList<>();
         List<Entity> entitiesToRemove = new ArrayList<>();
-        List<Entity> asteroidsToAdd = new ArrayList<>();
+        List<Entity> newAsteroids = new ArrayList<>();
 
         for (Entity asteroid : world.getEntities(Asteroid.class)) {
             // Check if the asteroid should be destroyed (e.g., hit by another entity, such as a bullet)
@@ -23,7 +23,7 @@ public class AsteroidControlSystem implements IEntityProcessingService {
                     asteroidsToRemove.add(asteroid);
                     entitiesToRemove.add(entity);
                     if (((Asteroid) asteroid).getSizeLevel() > 1) {
-                        asteroidsToAdd.addAll(splitAsteroid((Asteroid) asteroid, gameData));
+                        newAsteroids.addAll(splitAsteroid((Asteroid) asteroid, gameData));
                     }
                     break; // Exit the loop as the asteroid is already destroyed
                 }
@@ -40,17 +40,11 @@ public class AsteroidControlSystem implements IEntityProcessingService {
         }
 
         // Remove destroyed asteroids and other entities
-        for (Entity asteroid : asteroidsToRemove) {
-            world.removeEntity(asteroid);
-        }
-        for (Entity entity : entitiesToRemove) {
-            world.removeEntity(entity);
-        }
+        asteroidsToRemove.forEach(world::removeEntity);
+        entitiesToRemove.forEach(world::removeEntity);
 
         // Add new smaller asteroids
-        for (Entity newAsteroid : asteroidsToAdd) {
-            world.addEntity(newAsteroid);
-        }
+        newAsteroids.forEach(world::addEntity);
     }
 
     private boolean checkCollision(Entity entity1, Entity entity2) {

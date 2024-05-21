@@ -7,6 +7,7 @@ public class Asteroid extends Entity {
 
     public Asteroid(int sizeLevel) {
         this.sizeLevel = sizeLevel;
+        setSizeBasedOnLevel();
     }
 
     public int getSizeLevel() {
@@ -15,5 +16,21 @@ public class Asteroid extends Entity {
 
     public void setSizeLevel(int sizeLevel) {
         this.sizeLevel = sizeLevel;
+        setSizeBasedOnLevel();
+    }
+
+    private void setSizeBasedOnLevel() {
+        // Sizes 30, 20, 10 for levels 3, 2, 1 respectively
+        switch (sizeLevel) {
+            case 3:
+                setSize(30);
+                break;
+            case 2:
+                setSize(20);
+                break;
+            case 1:
+                setSize(10);
+                break;
+        }
     }
 }

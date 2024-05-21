@@ -11,7 +11,8 @@ public class AsteroidPlugin implements IGamePluginService {
 
     private Random random = new Random();
     private static final int MAX_ASTEROIDS = 15; // Maximum number of asteroids
-    private static final int MIN_ASTEROIDS = 5; // Minimum number of asteroids
+    private static final int SPAWN_INTERVAL = 3000; // Interval in milliseconds (3 seconds)
+    private long lastSpawnTime = 0;
 
     @Override
     public void start(GameData gameData, World world) {
@@ -25,19 +26,19 @@ public class AsteroidPlugin implements IGamePluginService {
 
     @Override
     public void process(GameData gameData, World world) {
-        // Ensure the minimum number of asteroids is maintained
-        while (world.getEntitiesByType("asteroid").size() < MIN_ASTEROIDS) {
+        // Check the time elapsed since the last spawn
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSpawnTime >= SPAWN_INTERVAL && world.getEntitiesByType("asteroid").size() < MAX_ASTEROIDS) {
             Entity asteroid = createAsteroid(gameData, 3); // Spawn new asteroids with max size level
             world.addEntity(asteroid);
             System.out.println("Asteroid dynamically spawned: X=" + asteroid.getX() + ", Y=" + asteroid.getY());
+            lastSpawnTime = currentTime; // Reset the spawn timer
         }
     }
 
     @Override
     public void stop(GameData gameData, World world) {
-        for (Entity e : world.getEntitiesByType("asteroid")) {
-            world.removeEntity(e);
-        }
+        // No need to remove asteroids on stop
     }
 
     private Entity createAsteroid(GameData gameData, int sizeLevel) {
