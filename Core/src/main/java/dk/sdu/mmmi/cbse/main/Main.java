@@ -8,12 +8,6 @@ import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.ICollisionDetectionService;
 import dk.sdu.mmmi.cbse.common.services.IEntityProcessingService;
 import dk.sdu.mmmi.cbse.common.services.IGamePluginService;
-import dk.sdu.mmmi.cbse.common.services.IPostEntityProcessingService;
-import java.util.Collection;
-import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.concurrent.ConcurrentHashMap;
-import static java.util.stream.Collectors.toList;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -22,6 +16,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static java.util.stream.Collectors.toList;
 
 public class Main extends Application {
 
@@ -32,6 +34,8 @@ public class Main extends Application {
     private final Pane gameWindow = new Pane();
 
     private ICollisionDetectionService collisionService;
+
+    private final Map<String, IGamePluginService> activePlugins = new HashMap<>();
 
     public static void main(String[] args) {
         launch(Main.class);
@@ -57,6 +61,12 @@ public class Main extends Application {
             if (event.getCode().equals(KeyCode.SPACE)) {
                 gameData.getKeys().setKey(GameKeys.SPACE, true);
             }
+            if (event.getCode().equals(KeyCode.O)) {
+                toggleModule("EnemyPlugin");
+            }
+            if (event.getCode().equals(KeyCode.P)) {
+                toggleModule("AsteroidPlugin");
+            }
         });
         scene.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.A)) {
@@ -75,27 +85,28 @@ public class Main extends Application {
 
         collisionService = new CollisionDetectionSystem();  // Initialize the collision service once here
 
-        // Lookup all Game Plugins using ServiceLoader
-        for (IGamePluginService iGamePlugin : getPluginServices()) {
-            iGamePlugin.start(gameData, world);
-        }
+        // Load and start all game plugins (modules)
+        loadAndStartModules();
+
+        // Create polygons for all entities and add them to the game window
         for (Entity entity : world.getEntities()) {
             Polygon polygon = new Polygon(entity.getPolygonCoordinates());
             polygons.put(entity, polygon);
             gameWindow.getChildren().add(polygon);
         }
 
+        // Start game loop
         render();
 
+        // Show the game window
         window.setScene(scene);
         window.setTitle("ASTEROIDS");
         window.show();
-
     }
 
     private void render() {
         new AnimationTimer() {
-            private long then = System.nanoTime(); // Initialize then with the current nano-time
+            private long then = System.nanoTime();
 
             @Override
             public void handle(long now) {
@@ -107,7 +118,6 @@ public class Main extends Application {
                 draw(); // Render the updated game state
                 gameData.getKeys().update(); // Optionally update the state of keys or other input if necessary
             }
-
         }.start();
     }
 
@@ -116,19 +126,16 @@ public class Main extends Application {
         for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
             entityProcessorService.process(gameData, world);
         }
+
         // Perform collision detection and handling
         collisionService.process(world);
 
-        // Ensure minimum number of asteroids
-        for (IGamePluginService gamePlugin : getPluginServices()) {
+        // Ensure plugins are processing their logic
+        for (IGamePluginService gamePlugin : activePlugins.values()) {
             gamePlugin.process(gameData, world);
         }
 
-//        for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
-//            postEntityProcessorService.process(gameData, world);
-//        }
-
-        // Remove polygons of removed entities
+        // Ensure polygons are in sync with entities
         world.getEntities().forEach(entity -> {
             if (!polygons.containsKey(entity)) {
                 Polygon polygon = new Polygon(entity.getPolygonCoordinates());
@@ -147,32 +154,48 @@ public class Main extends Application {
         });
     }
 
-
     private void draw() {
         for (Entity entity : world.getEntities()) {
             Polygon polygon = polygons.get(entity);
-            // Check if the polygon for the current entity exists, if not, create and add it
             if (polygon == null) {
                 polygon = new Polygon(entity.getPolygonCoordinates());
                 polygons.put(entity, polygon);
-                gameWindow.getChildren().add(polygon); // Add the newly created polygon to the game window
+                gameWindow.getChildren().add(polygon);
             }
-            // Now that we're sure polygon is not null, set its properties
             polygon.setTranslateX(entity.getX());
             polygon.setTranslateY(entity.getY());
             polygon.setRotate(entity.getRotation());
         }
     }
 
-    private Collection<? extends IGamePluginService> getPluginServices() {
-        return ServiceLoader.load(IGamePluginService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
+    private void loadAndStartModules() {
+        ServiceLoader<IGamePluginService> plugins = ServiceLoader.load(IGamePluginService.class);
+        for (IGamePluginService plugin : plugins) {
+            plugin.start(gameData, world);
+            activePlugins.put(plugin.getClass().getSimpleName(), plugin);
+        }
+    }
+
+    private void toggleModule(String pluginName) {
+        IGamePluginService plugin = activePlugins.get(pluginName);
+        if (plugin != null) {
+            plugin.stop(gameData, world);
+            activePlugins.remove(pluginName);
+            System.out.println(pluginName + " module stopped.");
+        } else {
+            ServiceLoader<IGamePluginService> plugins = ServiceLoader.load(IGamePluginService.class);
+            for (IGamePluginService loadedPlugin : plugins) {
+                if (loadedPlugin.getClass().getSimpleName().equals(pluginName)) {
+                    loadedPlugin.start(gameData, world);
+                    activePlugins.put(pluginName, loadedPlugin);
+                    System.out.println(pluginName + " module started.");
+                    break;
+                }
+            }
+        }
     }
 
     private Collection<? extends IEntityProcessingService> getEntityProcessingServices() {
         return ServiceLoader.load(IEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
-    }
-
-    private Collection<? extends IPostEntityProcessingService> getPostEntityProcessingServices() {
-        return ServiceLoader.load(IPostEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
 }
