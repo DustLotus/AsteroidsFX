@@ -3,6 +3,7 @@ package dk.sdu.mmmi.cbse.collision;
 import dk.sdu.mmmi.cbse.common.data.Entity;
 import dk.sdu.mmmi.cbse.common.data.World;
 import dk.sdu.mmmi.cbse.common.services.ICollisionDetectionService;
+import dk.sdu.mmmi.cbse.main.Main;
 
 import java.util.Collection;
 
@@ -37,7 +38,6 @@ public class CollisionDetectionSystem implements ICollisionDetectionService {
             Entity bullet = entity1.getType().equals("bullet") ? entity1 : entity2;
             Entity other = bullet == entity1 ? entity2 : entity1;
 
-            // Check if the bullet's owner is the entity it collided with
             if (bullet.getOwnerId() != null && bullet.getOwnerId().toString().equals(other.getID())) {
                 return; // Ignore collision if bullet hit its owner
             }
@@ -45,6 +45,11 @@ public class CollisionDetectionSystem implements ICollisionDetectionService {
             if (other.getType().equals("enemyShip") || other.getType().equals("asteroid")) {
                 world.removeEntity(bullet);
                 world.removeEntity(other);
+
+                if (other.getType().equals("asteroid")) {
+                    Main.incrementDestroyedAsteroids(); // Increase the counter when an asteroid is destroyed
+                }
+
                 System.out.println("Bullet hit " + other.getType() + ", both destroyed.");
             }
         }
