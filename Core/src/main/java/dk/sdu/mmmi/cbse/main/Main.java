@@ -28,9 +28,8 @@ public class Main extends Application {
     private final GameData gameData = new GameData();
     private final World world = new World();
     private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
-    private final Pane gameWindow = new Pane();
 
-    private static int destroyedAsteroids = 0;
+    private final Pane gameWindow = new Pane();
 
     private ICollisionDetectionService collisionService;
 
@@ -86,30 +85,29 @@ public class Main extends Application {
             gameWindow.getChildren().add(polygon);
         }
 
-        render(text);
+        render();
 
         window.setScene(scene);
         window.setTitle("ASTEROIDS");
         window.show();
+
     }
 
-    private void render(Text text) {
+    private void render() {
         new AnimationTimer() {
-            private long then = System.nanoTime();
+            private long then = System.nanoTime(); // Initialize then with the current nano-time
 
             @Override
             public void handle(long now) {
-                float delta = (now - then) / 1_000_000_000.0f;
-                then = now;
-                gameData.setDelta(delta);
+                float delta = (now - then) / 1_000_000_000.0f; // Calculate delta in seconds
+                then = now; // Update then to the current time for the next frame
+                gameData.setDelta(delta); // Set the calculated delta in GameData
 
-                update();
-                draw();
-                gameData.getKeys().update();
-
-                // Update the text with the current count of destroyed asteroids
-                text.setText("Destroyed asteroids: " + destroyedAsteroids);
+                update(); // Process game logic updates
+                draw(); // Render the updated game state
+                gameData.getKeys().update(); // Optionally update the state of keys or other input if necessary
             }
+
         }.start();
     }
 
@@ -125,6 +123,10 @@ public class Main extends Application {
         for (IGamePluginService gamePlugin : getPluginServices()) {
             gamePlugin.process(gameData, world);
         }
+
+//        for (IPostEntityProcessingService postEntityProcessorService : getPostEntityProcessingServices()) {
+//            postEntityProcessorService.process(gameData, world);
+//        }
 
         // Remove polygons of removed entities
         world.getEntities().forEach(entity -> {
@@ -144,6 +146,7 @@ public class Main extends Application {
             return false;
         });
     }
+
 
     private void draw() {
         for (Entity entity : world.getEntities()) {
@@ -171,9 +174,5 @@ public class Main extends Application {
 
     private Collection<? extends IPostEntityProcessingService> getPostEntityProcessingServices() {
         return ServiceLoader.load(IPostEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
-    }
-
-    public static void incrementDestroyedAsteroids() {
-        destroyedAsteroids++;
     }
 }
